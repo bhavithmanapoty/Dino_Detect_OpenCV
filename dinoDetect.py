@@ -9,7 +9,7 @@ def blur_image(image):
 
 def morphological_close(image):
     kernel = np.ones((5, 5))
-    dilation = cv2.dilate(image, kernel, iteration=1)
+    dilation = cv2.dilate(image, kernel, iterations=1)
     erosion = cv2.erode(dilation, kernel, iterations=1)
     return erosion
 
@@ -87,7 +87,7 @@ while capture.isOpened():
         if count_defects >= 4:
                 pyautogui.press('space')
                 cv2.putText(frame, "JUMP", (115, 80), cv2.FONT_HERSHEY_SIMPLEX, 2, 2, 2)
-                
+
     except Exception as e: 
         print("An exception has occurred")
         print(e)
