@@ -4,6 +4,15 @@ import math
 import pyautogui
 import sys
 
+def blur_image(image):
+    return cv2.GaussianBlur(image, (3, 3), 0)
+
+def morphological_close(image):
+    kernel = np.ones((5, 5))
+    dilation = cv2.dilate(image, kernel, iteration=1)
+    erosion = cv2.erode(dilation, kernel, iterations=1)
+    return erosion
+
 # Open Camera
 capture = cv2.VideoCapture(0)
 
@@ -18,13 +27,17 @@ while capture.isOpened():
     image_frame = frame[100:300, 100:300]
 
     #Convert image to HSV color Space after Gaussian Blur with a 3x3 Kernel
-    image = cv2.cvtColor(cv2.GaussianBlur(image_frame, (3, 3), 0), cv2.COLOR_BGR2HSV)
+    image = cv2.cvtColor(blur_image(image_frame), cv2.COLOR_BGR2HSV)
 
     #Create a binary Image of Hand
     binary_image = cv2.inRange(image, np.array([2, 0, 0]), np.array([20, 255, 255]))
     
     #Filter background noise with a closing morphological transformation
-    denoised_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, np.ones((5, 5)))
+    denoised_image = morphological_close(binary_image)
+
+    # Apply Gaussian Blur and Threshold
+    filtered = blur_image(denoised_image)
+    ret, thresh = cv2.threshold(filtered, 127, 255, 0)
 
     #Find contours
     contours, hierachy = cv2.findContours(denoised_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -74,8 +87,10 @@ while capture.isOpened():
         if count_defects >= 4:
                 pyautogui.press('space')
                 cv2.putText(frame, "JUMP", (115, 80), cv2.FONT_HERSHEY_SIMPLEX, 2, 2, 2)
-    except:
-        print("An error occurred")
+                
+    except Exception as e: 
+        print("An exception has occurred")
+        print(e)
         sys.exit(1)
 
     # Show required images
