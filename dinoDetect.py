@@ -13,6 +13,13 @@ def morphological_close(image):
     erosion = cv2.erode(dilation, kernel, iterations=1)
     return erosion
 
+def get_angle(start, end, far):
+    a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
+    b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
+    c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
+    angle = (math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c)) * 180) / 3.14
+    return angle
+
 # Open Camera
 capture = cv2.VideoCapture(0)
 
@@ -71,10 +78,7 @@ while capture.isOpened():
             end = tuple(contour[e][0])
             far = tuple(contour[f][0])
 
-            a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
-            b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
-            c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
-            angle = (math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c)) * 180) / 3.14
+            angle = get_angle(start, end, far)
 
             # if angle >= 90 draw a circle at the far point
             if angle <= 90:
